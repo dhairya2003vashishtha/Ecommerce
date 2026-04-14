@@ -1,0 +1,147 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+import {
+   CommandDialog,
+   CommandEmpty,
+   CommandGroup,
+   CommandInput,
+   CommandItem,
+   CommandList,
+   CommandSeparator,
+} from '@/components/ui/command'
+import { docsConfig } from '@/config/docs'
+import { cn } from '@/lib/utils'
+import { CircleIcon, LaptopIcon, MoonIcon, SunIcon, ShoppingBagIcon } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
+import * as React from 'react'
+
+export function CommandMenu({ ...props }: any) {
+   const router = useRouter()
+   const [open, setOpen] = React.useState(false)
+   const [search, setSearch] = React.useState('')
+   const [products, setProducts] = React.useState<any[]>([])
+   const [loading, setLoading] = React.useState(false)
+   const { setTheme } = useTheme()
+
+   React.useEffect(() => {
+      if (search.length > 1) {
+         setLoading(true)
+         fetch(`/api/products?search=${encodeURIComponent(search)}`)
+            .then(res => res.json())
+            .then(data => {
+               setProducts(data)
+               setLoading(false)
+            })
+      } else {
+         setProducts([])
+      }
+   }, [search])
+
+   React.useEffect(() => {
+      const down = (e: KeyboardEvent) => {
+         if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault()
+            setOpen((open) => !open)
+         }
+      }
+
+      document.addEventListener('keydown', down)
+      return () => document.removeEventListener('keydown', down)
+   }, [])
+
+   const runCommand = React.useCallback((command: () => unknown) => {
+      setOpen(false)
+      command()
+   }, [])
+
+   return (
+      <>
+         <Button
+            variant="outline"
+            className={cn(
+               'relative w-full justify-start text-sm font-light text-muted-foreground sm:pr-12 md:w-40 lg:w-64'
+            )}
+            onClick={() => setOpen(true)}
+            {...props}
+         >
+            <span className="inline-flex">Search...</span>
+         </Button>
+         <CommandDialog open={open} onOpenChange={setOpen}>
+            <CommandInput 
+               placeholder="Type a command or search products..." 
+               value={search}
+               onValueChange={setSearch}
+            />
+            <CommandList>
+               <CommandEmpty>No results found.</CommandEmpty>
+
+               {products.length > 0 && (
+                  <CommandGroup heading="Products">
+                     {products.map((product) => (
+                        <CommandItem
+                           key={product.id}
+                           value={`product-${product.id}`}
+                           onSelect={() => {
+                              runCommand(() => router.push(`/products/${product.id}`))
+                           }}
+                        >
+                           <div className="mr-2 flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border">
+                              {product.images && product.images[0] ? (
+                                 <img src={product.images[0].url} alt={product.name} className="h-full w-full object-cover" />
+                              ) : (
+                                 <ShoppingBagIcon className="h-4 w-4" />
+                              )}
+                           </div>
+                           <div className="flex flex-col">
+                              <span>{product.name}</span>
+                              <span className="text-xs text-muted-foreground">${Number(product.price).toFixed(2)}</span>
+                           </div>
+                        </CommandItem>
+                     ))}
+                  </CommandGroup>
+               )}
+
+               <CommandGroup heading="Links">
+                  {docsConfig.sidebarNav.map((navItem) => (
+                     <CommandItem
+                        key={navItem.href}
+                        value={navItem.title}
+                        onSelect={() => {
+                           runCommand(() => router.push(navItem.href as string))
+                        }}
+                     >
+                        <div className="mr-2 flex h-4 items-center justify-center">
+                           <CircleIcon className="h-3" />
+                        </div>
+                        {navItem.title}
+                     </CommandItem>
+                  ))}
+               </CommandGroup>
+               <CommandSeparator />
+               <CommandGroup heading="Theme">
+                  <CommandItem
+                     onSelect={() => runCommand(() => setTheme('light'))}
+                  >
+                     <SunIcon className="mr-2 h-4" />
+                     Light
+                  </CommandItem>
+                  <CommandItem
+                     onSelect={() => runCommand(() => setTheme('dark'))}
+                  >
+                     <MoonIcon className="mr-2 h-4" />
+                     Dark
+                  </CommandItem>
+                  <CommandItem
+                     onSelect={() => runCommand(() => setTheme('system'))}
+                  >
+                     <LaptopIcon className="mr-2 h-4" />
+                     System
+                  </CommandItem>
+               </CommandGroup>
+            </CommandList>
+         </CommandDialog>
+      </>
+   )
+}
