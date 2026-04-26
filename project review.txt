@@ -1,0 +1,18 @@
+Security: 6/10
+- Good: JWT (jose/HS256), httpOnly/secure cookies, Zod validation on all inputs, OTP cleared after use, 60s rate limiting, ownership checks on addresses/orders, role-based middleware, no SQLi (Prisma)
+- Bad: ❌ OTP stored in plaintext in DB, ❌ hardcoded admin email (dhairya2003v@gmail.com), ❌ no CSRF protection, ❌ no IP-based rate limiting, ❌ no input sanitization (XSS risk in blog descriptions), ❌ 30-day token expiry, ❌ no HTTPS enforcement in-app
+Client Friendliness: 8/10
+- Good: Glassmorphism + SakuraBackground login, dark/light mode, image carousel, command palette (⌘K), loading skeletons, toast notifications, persistent localStorage cart for guests, OTP auth (no passwords), responsive design, wishlist, product filters/sort, footer with links
+- Bad: No product search bar, no payment flow in checkout (just order creation), no guest checkout, no discount code input at checkout, several linked pages (About, Contact, FAQ, Terms) return 404
+Quality of Life (QOLS): 7/10
+- Good: ESLint + Prettier + Husky + lint-staged + commitlint, strong TypeScript, Prisma ORM, shadcn/ui, monorepo with shared packages, standardized error handling, Server Components, SWR/Zustand, Zod everywhere, sitemap/robots
+- Bad: ❌ ZERO tests (no test framework installed), no CI/CD pipeline, duplicate Prisma schemas (maintenance risk), no API docs (no Swagger), console.error scattered (no structured logging), mixed package managers (npm + bun)
+Admin Control: 7/10
+- Good: Full CRUD for Products, Categories, Banners, Orders, Payments, Users, Custom Orders; dashboard with revenue chart/sales/stock counts; order status management (9 states); Cloudinary image upload; paginated tables; role-gated
+- Bad: ❌ Half the DB models lack admin UI: DiscountCode, Notification, Error, Refund, Blog, Author, PaymentProvider, File, ProductReview — no management screens exist; no bulk operations, no export, no audit log, no sub-admin system
+Database Connection: 6/10
+- Good: Prisma singleton pattern, PostgreSQL, proper indexes, unique constraints, well-normalized schema (17 models), enum types, cart upsert pattern
+- Bad: ❌ Float for prices (precision loss with currency)(currently fix the currency in INR), ❌ OTP plaintext column, ❌ duplicate schema files (can drift), no migration history in repo, String[] arrays instead of junction tables, hard deletes throughout, no read-replica config
+Premium Feel: 8/10
+- Good: Gorgeous glassmorphism + animated Sakura petals, dark/light mode with smooth transitions, framer-motion page transitions, consistent rose/pink branding, gradient text, backdrop blur, Radix UI + shadcn design system, command palette, loading skeletons
+- Bad: checkout lacks payment step(currently only COD), no empty states for cart/wishlist, no product zoom/gallery/variants, no search autocomplete
